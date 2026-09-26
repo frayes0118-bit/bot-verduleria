@@ -1,0 +1,15 @@
+{
+  "nombre_negocio": "Verdulería (poné tu nombre acá)",
+  "zona_delivery": "Poné acá tu barrio o zona de reparto",
+  "horario_atencion": "Lunes a sábado de 9 a 20hs",
+  "horario_pedidos": "9 a 18hs",
+  "productos": [
+    { "nombre": "Papa", "unidad": "kg", "precio": 0 },
+    { "nombre": "Cebolla", "unidad": "kg", "precio": 0 },
+    { "nombre": "Tomate", "unidad": "kg", "precio": 0 },
+    { "nombre": "Lechuga", "unidad": "unidad", "precio": 0 },
+    { "nombre": "Zanahoria", "unidad": "kg", "precio": 0 },
+    { "nombre": "Zapallito", "unidad": "kg", "precio": 0 }
+  ],
+  "notas": "Actualizá los precios cada vez que cambien. El bot lee este archivo antes de cada respuesta, así que siempre contesta con el precio del día."
+}
