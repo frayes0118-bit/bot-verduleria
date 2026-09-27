@@ -1,15 +1,7 @@
 {
-  "nombre_negocio": "La Verdu",
-  "zona_delivery": "ciudad ,dorrego centro",
-  "horario_atencion": "9 a 22 hrs",
-  "horario_pedidos": "10 a 20 hrs",
-  "productos": [
-    { "nombre": "Papa", "unidad": "kg", "precio": 2000 },
-    { "nombre": "Cebolla", "unidad": "kg", "precio": 1800 },
-    { "nombre": "Tomate", "unidad": "kg", "precio": 2300 },
-    { "nombre": "Lechuga", "unidad": "unidad", "precio": 1700 },
-    { "nombre": "Zanahoria", "unidad": "kg", "precio": 1200 },
-    { "nombre": "Zapallito", "unidad": "kg", "precio": 2800 }
-  ],
-  "notas": "Actualizá los precios cada vez que cambien."
+  "nombre_negocio": "Verdulería",
+  "zona_delivery": "Poné acá tu barrio o zona de reparto",
+  "horario_atencion": "Lunes a sábado de 9 a 20hs",
+  "horario_pedidos": "9 a 18hs",
+  "metodos_pago": ["Efectivo", "Transferencia"]
 }

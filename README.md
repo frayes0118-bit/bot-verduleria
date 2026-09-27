@@ -1,76 +1,113 @@
-# Bot de WhatsApp para la verdulería (100% gratis)
+# Bot de WhatsApp con pedidos, stock y clientes (v2)
 
-Este bot responde automáticamente a tus clientes por WhatsApp usando
-Google Gemini (gratis, sin tarjeta), con los precios y productos que
-vos cargás en `negocio.json`.
+Esta versión ya no solo responde preguntas: toma el pedido completo,
+revisa tu stock real, pide nombre, dirección y forma de pago, y al
+final descuenta lo vendido de tu almacén y guarda el pedido.
 
-## Paso 1 — Editar tus datos
+## Archivos nuevos / cambiados
 
-Abrí `negocio.json` y completá:
-- El nombre de tu negocio
-- Tu zona de delivery
-- Tus productos y precios reales de hoy
+- **`negocio.json`** — datos generales (nombre, zona, horarios, métodos de pago).
+- **`stock.json`** — tu almacén: cada producto con precio y cantidad
+  disponible. Se descuenta solo con cada venta confirmada.
+- **`app.py`** — toda la lógica del flujo de conversación.
+- **`sesiones.json`** y **`pedidos.json`** — se crean solos cuando el
+  bot empieza a funcionar. No hace falta tocarlos a mano.
+  - `sesiones.json`: en qué paso de la conversación está cada cliente.
+  - `pedidos.json`: el historial completo de pedidos — tu "base de datos"
+    de clientes (nombre, dirección, qué compraron, cuánto pagaron, cuándo).
 
-Guardalo cada vez que cambien los precios.
+## Paso 1 — Cargar tu stock real
 
-## Paso 2 — Crear cuenta en Twilio y activar el WhatsApp Sandbox
+Abrí `stock.json` en GitHub y completá, para cada producto:
+- `"precio"`: precio actual por kg o unidad
+- `"stock_disponible"`: cuánto tenés hoy
 
-1. Andá a twilio.com/try-twilio y registrate.
-2. Buscá (con la lupa) **"Try WhatsApp"** o **"WhatsApp Sandbox"**.
-3. Vas a ver un número de Twilio y un código para conectarte
-   (ej: `join palabra-clave`).
-4. Desde tu WhatsApp normal, mandale ese código exacto a ese número.
+Ejemplo:
+```json
+"Tomate": { "unidad": "kg", "precio": 1500, "stock_disponible": 25 }
+```
 
-## Paso 3 — Conseguir tu API key de Gemini (gratis, sin tarjeta)
+Podés agregar más productos copiando el mismo formato, o borrar los
+que no vendas.
 
-1. Andá a **aistudio.google.com/apikey** (Google AI Studio).
-2. Iniciá sesión con tu cuenta de Google.
-3. Tocá **"Create API key"**.
-4. Copiá la clave que te da (empieza distinto según el momento, pero
-   es una cadena larga de letras y números).
-5. Esto no pide tarjeta ni tarjeta de crédito — es gratis dentro de
-   los límites de uso diario, que para una verdulería alcanzan de sobra.
+## Paso 2 — Reemplazar los archivos en GitHub
 
-## Paso 4 — Subir el código a GitHub
+Subí/reemplazá en tu repo `bot-verduleria`: `app.py`, `negocio.json`,
+`stock.json`, `requirements.txt` (si cambió) y este `README.md`.
 
-1. Andá a github.com y entrá con tu cuenta.
-2. **"+" → "New repository"** → nombre `bot-verduleria` → "Create repository".
-3. **"Add file" → "Upload files"** → subí `app.py`, `negocio.json`,
-   `requirements.txt`, `README.md`.
-4. **"Commit changes"**.
+## Paso 3 — MUY IMPORTANTE: agregar un Volume en Railway
 
-## Paso 5 — Desplegar en Railway
+Por defecto, cada vez que Railway vuelve a desplegar tu bot (por
+ejemplo, cuando editás el código), **borra los archivos que se generan
+solos** (`sesiones.json`, `pedidos.json`, y los cambios de stock que
+hizo el bot). Para que no se pierdan:
 
-1. Andá a railway.app y entrá con tu cuenta de GitHub.
-2. **"New Project" → "Deploy from GitHub repo"** → elegí `bot-verduleria`.
-3. En la pestaña **"Variables"**, agregá:
-   - `GEMINI_API_KEY` = la clave que copiaste en el Paso 3
-4. Si te pide Start Command, poné: `gunicorn app:app`
-5. Cuando termine el deploy, andá a **"Settings" → "Networking" →
-   "Generate Domain"** para conseguir tu URL pública.
+1. En Railway, andá a tu servicio `bot-verduleria`
+2. Buscá la pestaña **"Settings"** (⚙️) o el ícono de un disco/base de
+   datos, según la versión de la app — buscá algo que diga **"Volumes"**
+3. Tocá **"New Volume"** o **"+ Add Volume"**
+4. Ponele un **Mount Path** (ruta): `/data`
+5. En **"Variables"**, agregá una nueva:
+   - Nombre: `DATA_DIR`
+   - Valor: `/data`
+6. La primera vez, copiá manualmente tu `stock.json` y `negocio.json`
+   a esa carpeta (podés hacerlo con la terminal de Railway, o simplemente
+   dejar que el bot arranque sin volumen al principio para probar, y
+   agregarlo cuando ya estés en confianza con el flujo)
 
-## Paso 6 — Conectar Twilio con tu bot
+Mientras estás probando, podés arrancar SIN el Volume — el bot
+funciona igual, solo que si Railway vuelve a desplegar, el stock
+vendido y los pedidos guardados se resetean. Para uso real del
+negocio, el Volume es necesario.
 
-1. Volvé a la pantalla del Sandbox de Twilio (Paso 2).
-2. En **"When a message comes in"**, pegá tu URL de Railway + `/webhook`:
-   `https://tu-bot-verduleria.up.railway.app/webhook`
-3. Guardá.
+## Cómo se ve la conversación con un cliente
 
-## Paso 7 — Probarlo
+```
+Cliente: quiero 2 kg de tomate y una lechuga
+Bot: Este sería tu pedido:
+     • 2 kg de Tomate — $3000
+     • 1 unidad de Lechuga — $800
 
-Desde tu WhatsApp, escribile algo al número de Twilio, por ejemplo
-"¿tenés tomate?" — el bot debería responderte con el precio que
-cargaste en `negocio.json`.
+     *Total: $3800*
 
-## Sobre los costos
+     ¿Confirmás el pedido así? 🙂
 
-- Twilio Sandbox: gratis para probar (limitado a quienes mandan el
-  código "join...").
-- Gemini API: gratis dentro del límite diario de uso, sin tarjeta.
-- Railway: tiene un plan gratuito con horas limitadas por mes; para
-  un bot que recibe mensajes ocasionales de WhatsApp, alcanza de sobra
-  para empezar.
+Cliente: sí dale
+Bot: Genial 🥬 ¿Me pasás tu nombre y apellido para el pedido?
 
-Cuando quieras pasar a producción real (tu propio número de WhatsApp
-Business, verificado por Meta), es un trámite aparte — pero el código
-del bot no cambia.
+Cliente: Franco Reyes
+Bot: Gracias Franco! ¿A qué dirección te lo llevo?
+
+Cliente: Belgrano 450, Rodeo del Medio
+Bot: Perfecto. ¿Cómo vas a pagar: Efectivo o Transferencia?
+
+Cliente: efectivo
+Bot: ¡Listo, Franco! Tu pedido quedó confirmado 🎉
+     [resumen, dirección, método de pago]
+```
+
+Todo esto queda guardado en `pedidos.json`, y el stock de tomate y
+lechuga baja automáticamente en `stock.json`.
+
+## Sobre pasar a tu propio número de WhatsApp Business
+
+Ahora mismo el bot funciona sobre el **Sandbox de Twilio** — un número
+compartido de prueba al que cada cliente tiene que "unirse" primero
+con el código `join tower-exist`. Eso no sirve para clientes reales.
+
+Para que la gente te escriba directo a **tu propio número**, hay que:
+
+1. Tener (o crear) una página de Facebook para tu negocio
+2. Crear un **Meta Business Manager** (business.facebook.com) — es gratis
+3. En Twilio, ir a **Messaging → Senders → WhatsApp senders → "Register a WhatsApp Sender"**
+4. Seguir el asistente: te va a pedir vincular tu Meta Business Manager,
+   el número de teléfono que querés usar (no puede estar ya en WhatsApp
+   normal — hay que "liberarlo" o usar uno nuevo), nombre del negocio,
+   categoría, y una descripción
+5. Meta revisa la solicitud — normalmente tarda entre 1 y 3 días hábiles
+6. Una vez aprobado, cambiás el webhook de ese número (no del sandbox)
+   a la misma URL de Railway que ya tenés, y listo
+
+Este trámite lo hacemos juntos cuando quieras avanzar — es más lento
+que técnico (hay que esperar la aprobación de Meta), pero el código del
+bot no cambia en nada.

@@ -1,0 +1,8 @@
+{
+  "Papa": { "unidad": "kg", "precio": 0, "stock_disponible": 0 },
+  "Cebolla": { "unidad": "kg", "precio": 0, "stock_disponible": 0 },
+  "Tomate": { "unidad": "kg", "precio": 0, "stock_disponible": 0 },
+  "Lechuga": { "unidad": "unidad", "precio": 0, "stock_disponible": 0 },
+  "Zanahoria": { "unidad": "kg", "precio": 0, "stock_disponible": 0 },
+  "Zapallito": { "unidad": "kg", "precio": 0, "stock_disponible": 0 }
+}
