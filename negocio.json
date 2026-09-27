@@ -1,7 +1,7 @@
 {
-  "nombre_negocio": "Verdulería",
-  "zona_delivery": "Poné acá tu barrio o zona de reparto",
-  "horario_atencion": "Lunes a sábado de 9 a 20hs",
-  "horario_pedidos": "9 a 18hs",
+  "nombre_negocio": "La Verdu",
+  "zona_delivery": "Ciudad,Godoy Cruz,Dorrego,Centro de Mendoza",
+  "horario_atencion": "Lunes a Domingo de 8 a 22 hs",
+  "horario_pedidos": "9 a 20hs",
   "metodos_pago": ["Efectivo", "Transferencia"]
 }
