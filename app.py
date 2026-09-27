@@ -37,7 +37,7 @@ import google.generativeai as genai
 app = Flask(__name__)
 
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-modelo = genai.GenerativeModel("gemini-3.8-flash")
+modelo = genai.GenerativeModel("gemini-2.5-flash-lite")
 
 DATA_DIR = os.environ.get("DATA_DIR", os.path.dirname(__file__))
 RUTA_NEGOCIO = os.path.join(DATA_DIR, "negocio.json")
