@@ -1,15 +1,15 @@
 {
-  "nombre_negocio": "Verdulería (La Verdu)",
-  "zona_delivery": "Ciudad de Mendoza",
-  "horario_atencion": "Lunes a Domingo de 9 a 22hs",
-  "horario_pedidos": "10 a 20 hr",
+  "nombre_negocio": "La Verdu",
+  "zona_delivery": "ciudad ,dorrego centro",
+  "horario_atencion": "9 a 22 hrs",
+  "horario_pedidos": "10 a 20 hrs",
   "productos": [
-    { "nombre": "Papa", "unidad": "kg", "$2000": 0 },
-    { "nombre": "Cebolla", "unidad": "kg", "1800": 0 },
-    { "nombre": "Tomate", "unidad": "kg", "1200": 0 },
-    { "nombre": "Lechuga", "unidad": "unidad", "1000": 0 },
-    { "nombre": "Zanahoria", "unidad": "kg", "2200": 0 },
-    { "nombre": "Zapallito", "unidad": "kg", "1900": 0 }
+    { "nombre": "Papa", "unidad": "kg", "precio": 2000 },
+    { "nombre": "Cebolla", "unidad": "kg", "precio": 1800 },
+    { "nombre": "Tomate", "unidad": "kg", "precio": 2300 },
+    { "nombre": "Lechuga", "unidad": "unidad", "precio": 1700 },
+    { "nombre": "Zanahoria", "unidad": "kg", "precio": 1200 },
+    { "nombre": "Zapallito", "unidad": "kg", "precio": 2800 }
   ],
-  "notas": "Actualizá los precios cada vez que cambien. El bot lee este archivo antes de cada respuesta, así que siempre contesta con el precio del día."
+  "notas": "Actualizá los precios cada vez que cambien."
 }
