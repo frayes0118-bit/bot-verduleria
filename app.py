@@ -29,7 +29,7 @@ app = Flask(__name__)
 
 # La API key se lee de una variable de entorno, nunca la escribas acá directamente.
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-modelo = genai.GenerativeModel("gemini-2.5-flash")
+modelo = genai.GenerativeModel("gemini-3.8-flash")
 
 RUTA_NEGOCIO = os.path.join(os.path.dirname(__file__), "negocio.json")
 
