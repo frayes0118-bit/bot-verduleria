@@ -35,6 +35,36 @@ que no vendas.
 Subí/reemplazá en tu repo `bot-verduleria`: `app.py`, `negocio.json`,
 `stock.json`, `requirements.txt` (si cambió) y este `README.md`.
 
+## Paso 2.5 — Activar los comandos de administrador (para vos)
+
+Ahora podés cargar y actualizar el stock **directamente por WhatsApp**,
+sin tocar GitHub, escribiéndole al bot desde tu propio número.
+
+1. En Railway, andá a **Variables** y agregá una nueva:
+   - Nombre: `OWNER_WHATSAPP`
+   - Valor: `whatsapp:+549XXXXXXXXXX` (tu número, con `whatsapp:+` adelante,
+     código de país incluido, sin espacios ni guiones). Por ejemplo, si tu
+     número es +54 9 261 555 1234, el valor sería `whatsapp:+5492615551234`
+2. Guardá — Railway va a reiniciar el bot solo.
+
+A partir de ahí, escribiéndole al bot desde tu WhatsApp (el mismo que
+usás para todo esto), podés mandar:
+
+- **`admin ayuda`** — ver la lista de comandos
+- **`admin stock`** — ver todo tu stock actual
+- **`admin precio Tomate 1500`** — cambiar el precio de un producto
+- **`admin cantidad Tomate 25`** — poner cuánto tenés disponible
+- **`admin nuevo Acelga kg 800 10`** — agregar un producto que no estaba
+- **`admin pedidos`** — ver los últimos 5 pedidos que te hicieron
+
+⚠️ El nombre del producto tiene que escribirse igual a como aparece en
+`admin stock` (mayúscula inicial, tal cual). Si te equivocás, el bot
+te avisa que no lo encontró.
+
+Con esto, para cargar tu stock inicial real, simplemente le mandás al
+bot varios mensajes tipo `admin precio Tomate 1500` y `admin cantidad
+Tomate 25` para cada producto, en vez de tocar el archivo en GitHub.
+
 ## Paso 3 — MUY IMPORTANTE: agregar un Volume en Railway
 
 Por defecto, cada vez que Railway vuelve a desplegar tu bot (por

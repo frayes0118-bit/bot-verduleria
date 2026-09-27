@@ -45,6 +45,10 @@ RUTA_STOCK = os.path.join(DATA_DIR, "stock.json")
 RUTA_SESIONES = os.path.join(DATA_DIR, "sesiones.json")
 RUTA_PEDIDOS = os.path.join(DATA_DIR, "pedidos.json")
 
+# Tu propio número de WhatsApp (el del dueño), para poder usar los
+# comandos de administrador. Formato: "whatsapp:+549XXXXXXXXXX"
+OWNER_WHATSAPP = os.environ.get("OWNER_WHATSAPP", "")
+
 
 # ---------- Utilidades para leer/escribir los archivos ----------
 
@@ -102,6 +106,106 @@ def guardar_pedido(numero_cliente, sesion):
         "total": sesion["pedido"]["total"],
     })
     guardar_json(RUTA_PEDIDOS, pedidos)
+
+
+# ---------- Comandos de administrador (solo para el dueño, por WhatsApp) ----------
+
+AYUDA_ADMIN = """📋 *Comandos de administrador*
+
+*admin stock* — ver todo el stock actual
+*admin precio <Producto> <precio>* — cambiar el precio
+*admin cantidad <Producto> <cantidad>* — poner el stock disponible
+*admin nuevo <Producto> <unidad> <precio> <cantidad>* — agregar un producto nuevo
+*admin pedidos* — ver los últimos 5 pedidos
+*admin ayuda* — ver este mensaje de nuevo
+
+Ejemplos:
+admin precio Tomate 1500
+admin cantidad Tomate 25
+admin nuevo Acelga kg 800 10"""
+
+
+def texto_stock_completo(stock):
+    if not stock:
+        return "Todavía no cargaste ningún producto."
+    lineas = [
+        f"• {nombre}: ${p['precio']} / {p['unidad']} — stock: {p['stock_disponible']}"
+        for nombre, p in stock.items()
+    ]
+    return "📦 *Tu stock actual:*\n\n" + "\n".join(lineas)
+
+
+def manejar_comando_admin(mensaje, stock):
+    """
+    Devuelve el texto de respuesta si el mensaje es un comando de
+    administrador reconocido, o None si no lo es (para seguir con el
+    flujo normal de cliente).
+    """
+    texto = mensaje.strip()
+    partes = texto.split()
+
+    if not partes or partes[0].lower() != "admin":
+        return None, stock
+
+    if len(partes) == 1:
+        return AYUDA_ADMIN, stock
+
+    sub = partes[1].lower()
+
+    if sub == "ayuda":
+        return AYUDA_ADMIN, stock
+
+    if sub == "stock":
+        return texto_stock_completo(stock), stock
+
+    if sub == "pedidos":
+        pedidos = cargar_json(RUTA_PEDIDOS, [])
+        if not pedidos:
+            return "Todavía no hay pedidos registrados.", stock
+        ultimos = pedidos[-5:]
+        lineas = []
+        for p in reversed(ultimos):
+            items_txt = ", ".join(f"{it['cantidad']} {it['unidad']} {it['producto']}" for it in p["items"])
+            lineas.append(f"🧾 {p['fecha']} — {p['nombre']} — {items_txt} — ${p['total']:.0f} ({p['metodo_pago']})")
+        return "*Últimos pedidos:*\n\n" + "\n\n".join(lineas), stock
+
+    if sub == "precio" and len(partes) >= 4:
+        producto = " ".join(partes[2:-1])
+        try:
+            nuevo_precio = float(partes[-1])
+        except ValueError:
+            return f"No entendí el precio. Ejemplo: admin precio {producto} 1500", stock
+        if producto not in stock:
+            return f"No encontré '{producto}' en el stock. Fijate que el nombre sea igual al de 'admin stock'.", stock
+        stock[producto]["precio"] = nuevo_precio
+        guardar_stock(stock)
+        return f"Listo ✅ {producto} ahora cuesta ${nuevo_precio:.0f}", stock
+
+    if sub == "cantidad" and len(partes) >= 4:
+        producto = " ".join(partes[2:-1])
+        try:
+            nueva_cantidad = float(partes[-1])
+        except ValueError:
+            return f"No entendí la cantidad. Ejemplo: admin cantidad {producto} 25", stock
+        if producto not in stock:
+            return f"No encontré '{producto}' en el stock. Fijate que el nombre sea igual al de 'admin stock'.", stock
+        stock[producto]["stock_disponible"] = nueva_cantidad
+        guardar_stock(stock)
+        return f"Listo ✅ {producto} ahora tiene {nueva_cantidad} de stock", stock
+
+    if sub == "nuevo" and len(partes) >= 6:
+        producto = " ".join(partes[2:-3])
+        unidad = partes[-3]
+        try:
+            precio = float(partes[-2])
+            cantidad = float(partes[-1])
+        except ValueError:
+            return "No entendí el precio o la cantidad. Ejemplo: admin nuevo Acelga kg 800 10", stock
+        stock[producto] = {"unidad": unidad, "precio": precio, "stock_disponible": cantidad}
+        guardar_stock(stock)
+        return f"Listo ✅ agregué {producto} (${precio:.0f}/{unidad}, stock: {cantidad})", stock
+
+    return "No reconocí ese comando. Escribí *admin ayuda* para ver la lista.", stock
 
 
 # ---------- Entender el pedido con Gemini (solo extracción, sin precios) ----------
@@ -227,6 +331,14 @@ def webhook():
     sesion = sesiones.get(numero_cliente, sesion_nueva())
 
     respuesta_twilio = MessagingResponse()
+
+    # --- Comandos de administrador (solo si escribís vos, el dueño) ---
+    if OWNER_WHATSAPP and numero_cliente == OWNER_WHATSAPP:
+        texto_admin, stock = manejar_comando_admin(mensaje_cliente, stock)
+        if texto_admin is not None:
+            respuesta_twilio.message(texto_admin)
+            return str(respuesta_twilio)
+
     estado = sesion["estado"]
 
     # --- Paso 1: cliente pidiendo productos, o consulta libre ---
